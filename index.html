@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AS-4: Objection Handling | Buzzworks VA</title>
+    <script>
+        var currentCard = 0;
+        var isShowingAnswer = false;
+
+        function flipCard() {
+            var card = document.querySelector('.flashcard-inner');
+            card.classList.toggle('flipped');
+            isShowingAnswer = !isShowingAnswer;
+        }
+
+        function nextCard() {
+            var cards = document.querySelectorAll('.flashcard-set');
+            cards[currentCard].classList.remove('active');
+            currentCard = (currentCard + 1) % cards.length;
+            cards[currentCard].classList.add('active');
+            
+            // Reset flip state
+            var card = document.querySelector('.flashcard-inner');
+            if (isShowingAnswer) {
+                card.classList.remove('flipped');
+                isShowingAnswer = false;
+            }
+            
+            updateProgress();
+        }
+
+        function prevCard() {
+            var cards = document.querySelectorAll('.flashcard-set');
+            cards[currentCard].classList.remove('active');
+            currentCard = (currentCard - 1 + cards.length) % cards.length;
+            cards[currentCard].classList.add('active');
+            
+            // Reset flip state
+            var card = document.querySelector('.flashcard-inner');
+            if (isShowingAnswer) {
+                card.classList.remove('flipped');
+                isShowingAnswer = false;
+            }
+            
+            updateProgress();
+        }
+
+        function updateProgress() {
+            var cards = document.querySelectorAll('.flashcard-set');
+            document.getElementById('card-counter').innerText = (currentCard + 1) + ' / ' + cards.length;
+        }
+
+        function showCategory(category) {
+            var sections = document.getElementsByClassName('objection-category');
+            var buttons = document.getElementsByClassName('category-btn');
+            
+            for (var i = 0; i < sections.length; i++) {
+                sections[i].classList.remove('active');
+            }
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active');
+            }
+            
+            document.getElementById(category).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function copyResponse(responseId) {
+            var response = document.getElementById(responseId);
+            var text = response.innerText;
+            navigator.clipboard.writeText(text).then(function() {
+                var btn = event.target;
+                var originalText = btn.innerText;
+                btn.innerText = '✅ Copied!';
+                setTimeout(function() {
+                    btn.innerText = originalText;
+                }, 2000);
+            });
+        }
+
+        window.onload = function() {
+            updateProgress();
+        };
+    </script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --sage: #8b9d83;
+            --peach: #f6b5a7;
+            --mint: #c9d8c5;
+            --cream: #f8f9f6;
+            --dark: #2d3e2d;
+            --text: #3d4d3d;
+            --red: #ff6b6b;
+            --green: #51cf66;
+            --blue: #4dabf7;
+            --yellow: #ffd43b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--cream);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--sage) 0%, var(--mint) 100%);
+            color: white;
+            padding: 3rem 2rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 1rem;
+            opacity: 0.95;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .header .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        .meta-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .intro-section {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 5px solid var(--peach);
+        }
+
+        .section {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .section h2 {
+            color: var(--sage);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 3px solid var(--mint);
+        }
+
+        .section h3 {
+            color: var(--dark);
+            font-size: 1.4rem;
+            margin: 2rem 0 1rem 0;
+        }
+
+        .tip-box {
+            background: linear-gradient(135deg, var(--mint) 0%, var(--cream) 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--sage);
+        }
+
+        .tip-box strong {
+            color: var(--dark);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 3px solid #ffc107;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1.5rem 0;
+        }
+
+        .warning-box strong {
+            color: #856404;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        .framework-box {
+            background: linear-gradient(135deg, var(--blue) 0%, #74c0fc 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            margin: 2rem 0;
+        }
+
+        .framework-box h3 {
+            color: white;
+            margin-top: 0;
+        }
+
+        .framework-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .framework-step {
+            background: rgba(255,255,255,0.2);
+            padding: 1.5rem;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .step-number {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .step-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .category-btn {
+            padding: 1rem 1.5rem;
+            background: var(--cream);
+            border: 2px solid var(--mint);
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .category-btn:hover {
+            background: var(--mint);
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, var(--sage) 0%, var(--mint) 100%);
+            color: white;
+            border-color: var(--sage);
+        }
+
+        .objection-category {
+            display: none;
+        }
+
+        .objection-category.active {
+            display: block;
+        }
+
+        .objection-card {
+            background: var(--cream);
+            border: 3px solid var(--mint);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .objection-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            border-color: var(--sage);
+        }
+
+        .objection-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--red);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .objection-response {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--green);
+            margin-top: 1rem;
+            position: relative;
+        }
+
+        .response-label {
+            font-weight: 600;
+            color: var(--green);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .response-text {
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+
+        .copy-response-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--sage);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .copy-response-btn:hover {
+            background: var(--dark);
+        }
+
+        .why-it-works {
+            background: rgba(81, 207, 102, 0.1);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border-left: 3px solid var(--green);
+        }
+
+        .why-it-works strong {
+            color: var(--dark);
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Flashcard Styles */
+        .flashcard-container {
+            perspective: 1000px;
+            margin: 2rem auto;
+            max-width: 700px;
+        }
+
+        .flashcard {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .flashcard-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+
+        .flashcard-inner.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-front, .flashcard-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.15);
+        }
+
+        .flashcard-front {
+            background: linear-gradient(135deg, var(--red) 0%, #ff8787 100%);
+            color: white;
+        }
+
+        .flashcard-back {
+            background: linear-gradient(135deg, var(--green) 0%, #8ce99a 100%);
+            color: white;
+            transform: rotateY(180deg);
+        }
+
+        .flashcard-content {
+            font-size: 1.3rem;
+            line-height: 1.8;
+        }
+
+        .flashcard-label {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 600;
+        }
+
+        .flashcard-controls {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .flashcard-btn {
+            padding: 1rem 2rem;
+            background: var(--sage);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .flashcard-btn:hover {
+            background: var(--dark);
+            transform: translateY(-2px);
+        }
+
+        .flashcard-progress {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--sage);
+        }
+
+        .flashcard-set {
+            display: none;
+        }
+
+        .flashcard-set.active {
+            display: block;
+        }
+
+        .practice-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .practice-card {
+            background: white;
+            border: 2px solid var(--mint);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+
+        .practice-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .practice-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .category-tabs {
+                flex-direction: column;
+            }
+
+            .flashcard {
+                height: 350px;
+            }
+
+            .flashcard-content {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">BUZZWORKS VA</div>
+        <h1>MODULE AS-4</h1>
+        <div class="subtitle">Objection Handling for Appointment Setters</div>
+        <div class="meta-info">
+            <div class="meta-item">
+                <span>⏱️</span>
+                <span>Duration: 5 Hours</span>
+            </div>
+            <div class="meta-item">
+                <span>📚</span>
+                <span>Week 2 - Role-Specific Training</span>
+            </div>
+            <div class="meta-item">
+                <span>🎯</span>
+                <span>Phase 2A</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="intro-section">
+            <h2>Master the Art of Turning "No" Into "Yes"</h2>
+            <p>Objections are not rejections—they're opportunities. Every objection is a prospect telling you what they need to hear before they say yes. The best appointment setters don't avoid objections; they welcome them because objections mean engagement. A prospect who objects is still listening. Your job is to address their concern, reframe it, and guide them toward booking the appointment.</p>
+            
+            <div class="tip-box" style="margin-top: 1.5rem;">
+                <strong>🎯 Core Truth:</strong>
+                The objection you hear is rarely the real objection. "I'm not interested" usually means "You haven't shown me why this matters to me yet." Your goal is to uncover the real concern and address it with confidence and empathy.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>The LAER Framework for Handling Objections</h2>
+            
+            <p>Before we dive into specific objections, memorize this framework. Use it for EVERY objection you encounter:</p>
+
+            <div class="framework-box">
+                <h3>LAER: Your 4-Step Objection Handling System</h3>
+                <div class="framework-steps">
+                    <div class="framework-step">
+                        <div class="step-number">1️⃣</div>
+                        <div class="step-title">LISTEN</div>
+                        <p>Let them finish completely. Don't interrupt. Show you're listening: "I understand..."</p>
+                    </div>
+                    <div class="framework-step">
+                        <div class="step-number">2️⃣</div>
+                        <div class="step-title">ACKNOWLEDGE</div>
+                        <p>Validate their concern. "That makes total sense" or "I hear you, that's a common concern."</p>
+                    </div>
+                    <div class="framework-step">
+                        <div class="step-number">3️⃣</div>
+                        <div class="step-title">EXPLORE</div>
+                        <p>Ask a clarifying question. "Can I ask..." or "Just curious..." Understand the root cause.</p>
+                    </div>
+                    <div class="framework-step">
+                        <div class="step-number">4️⃣</div>
+                        <div class="step-title">RESPOND</div>
+                        <p>Address the concern directly and close for the appointment. Always end with a time-specific ask.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <strong>⚠️ Never Skip Steps:</strong>
+                Jumping straight to your response without listening and acknowledging makes prospects defensive. The LAER framework builds trust and shows you actually care about their concerns.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>The 20 Most Common Objections & Proven Responses</h2>
+            
+            <p>These objections cover 90% of what you'll hear. Memorize these responses and customize them to fit your agent's style.</p>
+
+            <div class="category-tabs">
+                <button class="category-btn active" onclick="showCategory('timing-objections')">⏰ Timing Objections</button>
+                <button class="category-btn" onclick="showCategory('competition-objections')">🏆 Competition Objections</button>
+                <button class="category-btn" onclick="showCategory('interest-objections')">❌ Interest Objections</button>
+                <button class="category-btn" onclick="showCategory('financial-objections')">💰 Financial Objections</button>
+                <button class="category-btn" onclick="showCategory('trust-objections')">🤝 Trust Objections</button>
+            </div>
+
+            <!-- TIMING OBJECTIONS -->
+            <div id="timing-objections" class="objection-category active">
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I'm just browsing online"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-10')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-10">"That's how most people start! The thing is, about 70% of the best properties never make it online - they're sold before they hit the market. [Agent Name] has access to those off-market listings. Would a quick 15-minute call work to see if any of those match what you're looking for?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You validate their online browsing but introduce scarcity (off-market listings). Creates FOMO and positions the agent as having exclusive access to properties they can't find themselves.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I don't need an agent, I can do it myself"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-11')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-11">"I totally respect that! You're right that you CAN do it yourself. The question is - do you have time to handle all the paperwork, negotiations, inspections, and legal requirements? Most people find it's worth having an expert handle that while they focus on their day job. Plus, if you're buying, the seller typically pays the commission anyway. Would you be open to a quick call to see how [Agent Name] could make this easier for you?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You respect their independence while highlighting the complexity and time commitment. The "seller pays commission" removes the cost objection. You frame the agent as making their life easier, not taking over.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"Take me off your list"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-12')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-12">"Absolutely, I can do that right now. Before I do, can I ask what changed? Did you already buy/sell, or is it just not the right time? [Listen to answer] I understand. I'll remove you immediately. Just so you know, if your situation changes down the road, feel free to reach out - we're always here to help."</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You comply immediately (shows respect) but ask a qualifying question that might reveal they're still in market with someone else or just annoyed by too many calls. Leaves door open professionally.
+                    </div>
+                </div>
+            </div>
+
+            <!-- FINANCIAL OBJECTIONS -->
+            <div id="financial-objections" class="objection-category">
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"How much does this cost?"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-13')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-13">"Great question! There's no cost to you to speak with [Agent Name] - it's a free consultation. If you decide to work together, the commission is typically paid by the [seller/built into the transaction]. [Agent Name] will explain everything on the call. Does [time] work for you?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You immediately remove the cost barrier by clarifying it's free to talk. You explain commission briefly without getting into complex details (that's for the agent). Then you close for the appointment.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I'm not pre-approved yet"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-14')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-14">"That's actually perfect timing! [Agent Name] works with several great lenders who can get you pre-approved quickly. Would you like [him/her] to introduce you? It's free and takes about 20 minutes. Once you're pre-approved, we can start looking at homes right away! How about we schedule a call with [Agent Name] this week?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You turn "not pre-approved" into a REASON to talk to the agent (they'll help you get pre-approved). You make it sound quick and easy. This positions your agent as a solution provider, not just a house-shower.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I can't afford it right now"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-15')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-15">"I hear you - affordability is definitely important. That's actually why talking to [Agent Name] early makes sense. [He/She] can help you understand what you CAN afford, show you programs for first-time buyers, down payment assistance, and create a game plan. Would a quick 15-minute call work to explore your options?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You acknowledge their concern but reframe the agent as someone who helps with affordability (programs, assistance, planning). Many people don't know what they can actually afford or what programs exist.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I need to save more money first"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-16')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-16">"That's smart planning! While you're saving, [Agent Name] can help you understand exactly how much you need and what loan programs might work for you. There are actually programs with as little as 3% down. Would you be open to a quick call to see what your options are? You might be closer to buying than you think!"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You validate their saving goal but introduce the possibility they might not need to save as much as they think. Creates hope and urgency. Positions the agent as an educator who can accelerate their timeline.
+                    </div>
+                </div>
+            </div>
+
+            <!-- TRUST OBJECTIONS -->
+            <div id="trust-objections" class="objection-category">
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I don't know you / I've never heard of you"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-17')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-17">"That's totally fair! That's exactly why I'm calling - to introduce you to [Agent Name]. [He/She] has been serving [area] for [X years] and has helped [X number] of families buy/sell homes. Would you be open to a quick 15-minute call just to learn more about what [he/she] offers? No pressure - just information."</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You acknowledge their skepticism and use social proof (years in business, number of clients) to build credibility. The "no pressure, just information" lowers their guard.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I've had bad experiences with agents before"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-18')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-18">"I'm really sorry to hear that. Can I ask what happened? [Listen empathetically] That's frustrating. The good news is, not all agents operate that way. [Agent Name] specializes in [communication/responsiveness/transparency] - which is why our clients love working with [him/her]. Would you be willing to give [him/her] a chance with just a quick intro call? If it's not a good fit, no hard feelings."</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You listen to their bad experience (builds trust) and position your agent as the opposite of what went wrong. The "no hard feelings" removes pressure and shows you respect their autonomy.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"How did you get my information?"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-19')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-19">"Great question! You [filled out a form on our website/requested information about homes in the area/attended an open house/etc.]. I'm following up to see how we can help with your [buying/selling] goals. Is this still something you're interested in?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You answer directly and honestly, reminding them they expressed interest. This reframes the call from "cold outreach" to "following up on your request." Then you qualify if they're still interested.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I'm not giving you my information"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-20')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-20">"I totally understand - privacy is important. I'm not asking for anything sensitive right now. I just want to see if [Agent Name] can help with your [buying/selling] goals. The only information we'd need is your timeline and what you're looking for. Would a quick 10-minute call work to see if we're a good fit?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You respect their privacy concern and clarify you're not asking for sensitive data (SSN, financials). You minimize what you need (just timeline and preferences). This lowers their resistance.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I'm not in that area anymore"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-21')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-21">"Oh, no problem! Where are you looking now? [Get new area] Great! [Agent Name] actually has referral partners all over [state/country]. Let me connect you with the right person who specializes in [new area]. Can I get your best number and email?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        Instead of dead-ending the conversation, you pivot to still provide value through a referral. This shows you're helpful (builds trust) and keeps the lead alive through your referral network.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"Stop calling me!"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-22')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-22">"I apologize for the inconvenience. I'll remove you from our call list immediately. Can I ask - have you been receiving multiple calls from us? [If yes] I'm sorry about that, there must have been a system error. You won't hear from us again. [If they calm down] Before I go, were you ever interested in [buying/selling], or was the inquiry not from you?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You de-escalate immediately with an apology and compliance. If they've been called multiple times, acknowledging the error shows accountability. Some angry prospects calm down and become leads if handled with respect.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FLASHCARDS SECTION -->
+        <div class="section">
+            <h2>Interactive Flashcards: Practice Until Perfect</h2>
+            
+            <p>Use these flashcards to memorize your responses. Click the card to flip it. Practice until you can respond to any objection instantly and confidently.</p>
+
+            <div class="flashcard-container">
+                <div class="flashcard-set active">
+                    <div class="flashcard" onclick="flipCard()">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="flashcard-label">OBJECTION</div>
+                                <div class="flashcard-content">"I'm just looking / not ready yet"</div>
+                            </div>
+                            <div class="flashcard-back">
+                                <div class="flashcard-label">YOUR RESPONSE</div>
+                                <div class="flashcard-content">"I completely understand! Most of our clients started by just looking too. That's actually the perfect time to connect with [Agent Name] - no pressure, just to get expert guidance so when you ARE ready, you're ahead of the game. Would a quick 15-minute intro call work for you this week?"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flashcard-set">
+                    <div class="flashcard" onclick="flipCard()">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="flashcard-label">OBJECTION</div>
+                                <div class="flashcard-content">"I'm already working with another agent"</div>
+                            </div>
+                            <div class="flashcard-back">
+                                <div class="flashcard-label">YOUR RESPONSE</div>
+                                <div class="flashcard-content">"That's great! I'm glad you have representation. Just curious - are you under an exclusive agreement with them, or are you still interviewing agents?"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flashcard-set">
+                    <div class="flashcard" onclick="flipCard()">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="flashcard-label">OBJECTION</div>
+                                <div class="flashcard-content">"Can you just email me the information?"</div>
+                            </div>
+                            <div class="flashcard-back">
+                                <div class="flashcard-label">YOUR RESPONSE</div>
+                                <div class="flashcard-content">"Absolutely, I'd be happy to send that over! [Agent Name] also has some exclusive listings and market insights that aren't online yet. Would a 10-minute call work to go over those with you?"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flashcard-set">
+                    <div class="flashcard" onclick="flipCard()">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="flashcard-label">OBJECTION</div>
+                                <div class="flashcard-content">"I need to talk to my spouse first"</div>
+                            </div>
+                            <div class="flashcard-back">
+                                <div class="flashcard-label">YOUR RESPONSE</div>
+                                <div class="flashcard-content">"That makes total sense! Home buying/selling is definitely a joint decision. Would your spouse be available to join a call together? We can find a time that works for both of you."</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flashcard-set">
+                    <div class="flashcard" onclick="flipCard()">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="flashcard-label">OBJECTION</div>
+                                <div class="flashcard-content">"How much does this cost?"</div>
+                            </div>
+                            <div class="flashcard-back">
+                                <div class="flashcard-label">YOUR RESPONSE</div>
+                                <div class="flashcard-content">"Great question! There's no cost to you to speak with [Agent Name] - it's a free consultation. If you decide to work together, the commission is typically paid by the seller. [Agent Name] will explain everything on the call."</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flashcard-set">
+                    <div class="flashcard" onclick="flipCard()">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="flashcard-label">OBJECTION</div>
+                                <div class="flashcard-content">"I'm not interested"</div>
+                            </div>
+                            <div class="flashcard-back">
+                                <div class="flashcard-label">YOUR RESPONSE</div>
+                                <div class="flashcard-content">"I understand! Can I ask - is it just bad timing right now, or are you not planning to [buy/sell] at all? When would be a better time to follow up?"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flashcard-set">
+                    <div class="flashcard" onclick="flipCard()">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="flashcard-label">OBJECTION</div>
+                                <div class="flashcard-content">"I'm too busy right now"</div>
+                            </div>
+                            <div class="flashcard-back">
+                                <div class="flashcard-label">YOUR RESPONSE</div>
+                                <div class="flashcard-content">"I totally understand! That's actually why I'm calling - to save you time. Instead of researching agents and properties, [Agent Name] can give you all that in one quick 15-minute call. Would early morning or evening work better?"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flashcard-set">
+                    <div class="flashcard" onclick="flipCard()">
+                        <div class="flashcard-inner">
+                            <div class="flashcard-front">
+                                <div class="flashcard-label">OBJECTION</div>
+                                <div class="flashcard-content">"I'm not pre-approved yet"</div>
+                            </div>
+                            <div class="flashcard-back">
+                                <div class="flashcard-label">YOUR RESPONSE</div>
+                                <div class="flashcard-content">"That's actually perfect timing! [Agent Name] works with great lenders who can get you pre-approved quickly. Would you like an introduction? It's free and takes about 20 minutes. Once you're pre-approved, we can start looking right away!"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flashcard-controls">
+                <button class="flashcard-btn" onclick="prevCard()">← Previous</button>
+                <button class="flashcard-btn" onclick="flipCard()">🔄 Flip Card</button>
+                <button class="flashcard-btn" onclick="nextCard()">Next →</button>
+            </div>
+            
+            <div class="flashcard-progress" id="card-counter">1 / 8</div>
+
+            <div class="tip-box" style="margin-top: 2rem;">
+                <strong>🎯 Practice Challenge:</strong>
+                Go through all flashcards 3 times per day for 7 days. By day 7, you'll be able to respond to any objection without thinking. That's when you become truly dangerous as an appointment setter.
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Advanced Objection Handling Techniques</h2>
+            
+            <div class="practice-grid">
+                <div class="practice-card">
+                    <div class="practice-icon">🔄</div>
+                    <div class="practice-title">The Feel-Felt-Found Method</div>
+                    <p>"I understand how you FEEL. Many of our clients FELT the same way. What they FOUND is that..."</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">This creates empathy and social proof. "Other people like you had the same concern, but here's what happened when they moved forward."</p>
+                </div>
+
+                <div class="practice-card">
+                    <div class="practice-icon">❓</div>
+                    <div class="practice-title">The Clarifying Question</div>
+                    <p>"Can I ask what specifically concerns you about...?"</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">Get them talking. Often the stated objection isn't the real one. Asking questions uncovers the true barrier.</p>
+                </div>
+
+                <div class="practice-card">
+                    <div class="practice-icon">🎯</div>
+                    <div class="practice-title">The Boomerang Technique</div>
+                    <p>Turn their objection into a REASON to book.</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">"I'm too busy" → "That's exactly why this call will save you time!"<br>"I'm not ready" → "That's the perfect time to get guidance!"</p>
+                </div>
+
+                <div class="practice-card">
+                    <div class="practice-icon">🤝</div>
+                    <div class="practice-title">The Agreement Close</div>
+                    <p>"Makes sense. If I could show you how we solve that exact problem, would you be open to a quick call?"</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">Acknowledge their concern, then create a conditional agreement. If you solve their problem, will they take action?</p>
+                </div>
+
+                <div class="practice-card">
+                    <div class="practice-icon">⏰</div>
+                    <div class="practice-title">The Urgency Injection</div>
+                    <p>"I totally understand. Just so you know, [Agent Name]'s schedule fills up fast. I have [day/time] available - would that work?"</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">Creates scarcity. If they wait, they might not get their preferred time slot.</p>
+                </div>
+
+                <div class="practice-card">
+                    <div class="practice-icon">🎁</div>
+                    <div class="practice-title">The Value Stack</div>
+                    <p>List everything they'll get on the call.</p>
+                    <p style="margin-top: 0.5rem; font-size: 0.9rem;">"In just 15 minutes you'll get: market analysis, comparable homes, pre-approval guidance, and a customized search setup. Does [time] work?"</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>What NOT to Do: Common Mistakes</h2>
+            
+            <div class="warning-box">
+                <strong>❌ Mistake #1: Arguing with the Objection</strong>
+                <p style="margin-top: 0.5rem;">Never say "But..." or "Actually..." This makes prospects defensive. Always acknowledge first, then reframe.</p>
+            </div>
+
+            <div class="warning-box">
+                <strong>❌ Mistake #2: Giving Up Too Easily</strong>
+                <p style="margin-top: 0.5rem;">Most appointment setters quit after the first objection. Top performers know the first "no" is just a speed bump. Try 2-3 approaches before moving on.</p>
+            </div>
+
+            <div class="warning-box">
+                <strong>❌ Mistake #3: Talking Too Much</strong>
+                <p style="margin-top: 0.5rem;">After you respond to an objection, STOP TALKING. Let them respond. Silence is powerful. Don't fill it with nervous chatter.</p>
+            </div>
+
+            <div class="warning-box">
+                <strong>❌ Mistake #4: Not Using Their Name</strong>
+                <p style="margin-top: 0.5rem;">Using someone's name builds rapport. "I understand, [Name]..." feels more personal and respectful than "I understand..."</p>
+            </div>
+
+            <div class="warning-box">
+                <strong>❌ Mistake #5: Forgetting to Close</strong>
+                <p style="margin-top: 0.5rem;">Every objection response MUST end with an attempt to book the appointment. Don't answer the objection and then wait. Answer, then close.</p>
+            </div>
+
+            <div class="warning-box">
+                <strong>❌ Mistake #6: Sounding Scripted</strong>
+                <p style="margin-top: 0.5rem;">These responses are templates, not scripts. Use your own words. Sound natural. Vary your tonality. Authenticity beats perfection.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Your Objection Handling Practice Plan</h2>
+            
+            <div class="intro-section">
+                <h3>Week 1: Memorization</h3>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>Study flashcards 3x per day (morning, lunch, evening)</li>
+                    <li>Write out responses by hand (muscle memory)</li>
+                    <li>Record yourself saying each response, then listen back</li>
+                    <li>By end of week, you should know all 22 objections cold</li>
+                </ul>
+
+                <h3 style="margin-top: 2rem;">Week 2: Role-Playing</h3>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>Practice with a colleague or friend playing the prospect</li>
+                    <li>Have them throw random objections at you</li>
+                    <li>Practice using LAER framework in real-time</li>
+                    <li>Record your role-play sessions and critique yourself</li>
+                </ul>
+
+                <h3 style="margin-top: 2rem;">Week 3: Real-World Application</h3>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>Use your learned responses on actual calls</li>
+                    <li>Track which objections you handle well vs. struggle with</li>
+                    <li>Adjust responses to fit your natural speaking style</li>
+                    <li>Celebrate small wins when you overcome objections</li>
+                </ul>
+
+                <h3 style="margin-top: 2rem;">Week 4: Mastery</h3>
+                <ul style="margin-left: 2rem; margin-top: 1rem;">
+                    <li>You should now handle objections instinctively</li>
+                    <li>Focus on tone, confidence, and natural flow</li>
+                    <li>Start combining techniques (LAER + Boomerang + Close)</li>
+                    <li>You're now a black belt in objection handling</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Final Mindset Shift: Objections Are Opportunities</h2>
+            
+            <div class="intro-section" style="background: linear-gradient(135deg, var(--sage) 0%, var(--mint) 100%); color: white; border-left: none;">
+                <p style="font-size: 1.2rem; line-height: 1.8;">The moment you stop fearing objections and start welcoming them, you become unstoppable. Every objection is a prospect telling you: "I'm interested, but I need more information" or "I'm interested, but I need reassurance."</p>
+                
+                <p style="font-size: 1.2rem; line-height: 1.8; margin-top: 1.5rem;">Prospects who object are still engaged. They haven't hung up. They're giving you a chance to address their concerns. That's a gift.</p>
+                
+                <p style="font-size: 1.2rem; line-height: 1.8; margin-top: 1.5rem;">The best appointment setters have a 50%+ success rate at overcoming objections because they:</p>
+                <ul style="margin-left: 2rem; margin-top: 1rem; font-size: 1.1rem;">
+                    <li>Listen without interrupting</li>
+                    <li>Acknowledge genuinely</li>
+                    <li>Ask clarifying questions</li>
+                    <li>Respond with confidence</li>
+                    <li>Always close for the appointment</li>
+                </ul>
+
+                <p style="font-size: 1.3rem; line-height: 1.8; margin-top: 2rem; font-weight: 600;">Master these 22 objections. Practice the LAER framework. Welcome objections as opportunities. Do this, and you'll book more appointments than you ever thought possible.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Quick Reference: Objection Response Cheat Sheet</h2>
+            
+            <p>Print this out and keep it next to your desk. When you hear an objection, quickly scan for the response.</p>
+
+            <div style="background: var(--cream); padding: 2rem; border-radius: 12px; margin-top: 1.5rem;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--sage); color: white;">
+                            <th style="padding: 1rem; text-align: left; border: 1px solid #ddd;">OBJECTION</th>
+                            <th style="padding: 1rem; text-align: left; border: 1px solid #ddd;">QUICK RESPONSE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Just looking"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Perfect time for guidance → 15-min call</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Already have agent"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Exclusive agreement? → Second opinion?</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Email me"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Will do + exclusive insights → 10-min call</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Talk to spouse"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Smart! Can spouse join call together?</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"How much?"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Free consultation → Seller pays commission</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Not interested"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Bad timing or not planning? → When to follow up?</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Too busy"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">That's why! Save time → Morning or evening?</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Call back later"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">When? → [Day/time] or [alternative]?</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Not pre-approved"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Perfect! Agent has lenders → Quick intro?</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Can't afford"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Agent shows what you CAN afford → Programs?</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Don't know you"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">That's why calling → [X years, X clients] → Info call?</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Bad experience"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Sorry to hear → What happened? → We're different</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Just browsing online"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">70% best homes never online → Off-market access?</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Don't need agent"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">CAN do it → Do you have TIME? → Make easier?</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Friend is agent"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Great! Actively working? → Business vs. personal?</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Agent in mind"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Awesome! Met them yet? → Compare options?</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Need to save more"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Smart! Programs with 3% down → Closer than you think?</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"How'd you get my info?"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">You [form/open house/etc.] → Still interested?</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Not giving info"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Understand privacy → Just timeline + preferences → Quick fit call?</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Wrong area"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Where are you now? → Referral partner → Connect you?</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Take me off list"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Will do now → What changed? → Door open if situation changes</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; font-weight: 600;">"Stop calling!"</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Apologize → Remove immediately → Multiple calls?</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Bonus: Handling Multiple Objections</h2>
+            
+            <p>Sometimes prospects hit you with multiple objections in one conversation. Here's how to handle it:</p>
+
+            <div class="tip-box">
+                <strong>🎯 The Stacking Strategy:</strong>
+                <p style="margin-top: 0.5rem;">When you get multiple objections, address them in order of importance, not order received.</p>
+                <p style="margin-top: 0.5rem; font-weight: 600;">Example:</p>
+                <p style="margin-top: 0.5rem; font-style: italic;">"I'm too busy, I'm already working with someone, and I don't know if I can afford it."</p>
+                <p style="margin-top: 0.5rem;"><strong>Your Response:</strong></p>
+                <p style="margin-top: 0.5rem;">"I hear you - that's a lot on your plate! Let me address the affordability piece first since that's most important. [Agent Name] can actually help you understand what you CAN afford with today's programs. As for being busy, that's exactly why this 15-minute call will save you time. And regarding your current agent - are you under an exclusive agreement or still exploring options?"</p>
+            </div>
+
+            <div class="tip-box">
+                <strong>🎯 The Permission Approach:</strong>
+                <p style="margin-top: 0.5rem;">"I hear three concerns there. Can I address each one? Which is most important to you?"</p>
+                <p style="margin-top: 0.5rem;">This shows you're listening, organized, and respectful. Most prospects will tell you their REAL objection when you ask which matters most.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Your Objection Handling Scorecard</h2>
+            
+            <p>Track your success with each objection type. This data tells you where you're strong and where you need more practice.</p>
+
+            <div style="background: var(--cream); padding: 2rem; border-radius: 12px; margin-top: 1.5rem; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--sage); color: white;">
+                            <th style="padding: 1rem; text-align: left; border: 1px solid #ddd;">Objection Type</th>
+                            <th style="padding: 1rem; text-align: center; border: 1px solid #ddd;">Times Heard</th>
+                            <th style="padding: 1rem; text-align: center; border: 1px solid #ddd;">Successfully Overcame</th>
+                            <th style="padding: 1rem; text-align: center; border: 1px solid #ddd;">Success Rate</th>
+                            <th style="padding: 1rem; text-align: left; border: 1px solid #ddd;">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Just looking</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____%</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">_____________</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Already have agent</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____%</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">_____________</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Email me</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____%</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">_____________</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Talk to spouse</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____%</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">_____________</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Too busy</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____%</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">_____________</td>
+                        </tr>
+                        <tr style="background: white;">
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">Not interested</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd; text-align: center;">____%</td>
+                            <td style="padding: 0.75rem; border: 1px solid #ddd;">_____________</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tip-box" style="margin-top: 1.5rem;">
+                <strong>📊 How to Use This:</strong>
+                <p style="margin-top: 0.5rem;">After every call, tally which objection you heard and whether you overcame it (booked the appointment). Weekly, calculate your success rate for each objection type. Focus your practice on objections where your success rate is below 30%.</p>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Final Challenge: The 30-Day Objection Mastery</h2>
+            
+            <div class="intro-section">
+                <p style="font-size: 1.1rem; line-height: 1.8;">For the next 30 days, commit to mastering objection handling. Here's your daily routine:</p>
+                
+                <div style="margin-top: 2rem;">
+                    <h3 style="color: var(--sage);">Daily (15 minutes):</h3>
+                    <ul style="margin-left: 2rem; margin-top: 0.5rem; line-height: 1.8;">
+                        <li>Review 5 random flashcards</li>
+                        <li>Practice one objection out loud</li>
+                        <li>Record yourself and listen back</li>
+                    </ul>
+
+                    <h3 style="color: var(--sage); margin-top: 1.5rem;">Weekly (30 minutes):</h3>
+                    <ul style="margin-left: 2rem; margin-top: 0.5rem; line-height: 1.8;">
+                        <li>Review your objection scorecard</li>
+                        <li>Identify your weakest objection</li>
+                        <li>Role-play that objection 10 times</li>
+                        <li>Update your responses if needed</li>
+                    </ul>
+
+                    <h3 style="color: var(--sage); margin-top: 1.5rem;">By Day 30, You Will:</h3>
+                    <ul style="margin-left: 2rem; margin-top: 0.5rem; line-height: 1.8;">
+                        <li>✅ Respond to any objection within 2 seconds</li>
+                        <li>✅ Have 40%+ success rate overcoming objections</li>
+                        <li>✅ Actually WELCOME objections instead of fearing them</li>
+                        <li>✅ Book 50-100% more appointments than before</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="background: linear-gradient(135deg, var(--sage) 0%, var(--mint) 100%); color: white; padding: 2rem; border-radius: 16px; margin-top: 2rem; text-align: center;">
+                <h3 style="color: white; font-size: 1.8rem; margin-bottom: 1rem;">Your Commitment</h3>
+                <p style="font-size: 1.2rem; line-height: 1.8;">I commit to mastering objection handling. I will practice daily, track my results, and view every objection as an opportunity to improve. In 30 days, I will be an objection-handling machine.</p>
+                <p style="font-size: 1.3rem; margin-top: 1.5rem; font-weight: 600;">Now go turn those "no's" into "yes's"! 🚀</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+                        <span>"I'm just looking / not ready yet"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-1')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-1">"I completely understand! Most of our clients started by just looking too. That's actually the perfect time to connect with [Agent Name] - no pressure, just to get expert guidance so when you ARE ready, you're ahead of the game. Would a quick 15-minute intro call work for you this week?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You're acknowledging their stage ("just looking") while reframing it as the BEST time to talk to an agent. You're lowering pressure ("no pressure") and emphasizing future benefit ("ahead of the game"). The 15-minute timeframe feels low-commitment.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I need to talk to my spouse first"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-2')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-2">"That makes total sense! Home buying/selling is definitely a joint decision. Would your spouse be available to join a call together? We can find a time that works for both of you. How about [day] evening?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You validate the need for joint decision-making instead of fighting it. Then you proactively solve the problem by suggesting they BOTH join the call. This prevents the endless "I need to talk to my spouse" loop.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I'm too busy right now"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-3')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-3">"I totally understand! That's actually why I'm calling - to save you time. Instead of you having to research agents, properties, and market conditions, [Agent Name] can give you all that in one quick 15-minute call. Would early morning or evening work better for your schedule?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You flip "too busy" into a REASON to book the call (save time). Offering morning vs. evening gives them choice and control while moving toward a yes.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"Call me back later"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-4')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-4">"Happy to! When would be a good time? I want to make sure I catch you. Would [specific day/time] work, or is [alternative day/time] better?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        Instead of accepting vague "later," you get commitment to a specific time. Offering two options increases the chance they'll pick one instead of deflecting again.
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPETITION OBJECTIONS -->
+            <div id="competition-objections" class="objection-category">
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I'm already working with another agent"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-5')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-5">"That's great! I'm glad you have representation. Just curious - are you under an exclusive agreement with them, or are you still interviewing agents? [If exclusive] No problem, best of luck! [If not exclusive] Would you be open to a quick second opinion? [Agent Name] specializes in [area/niche] and might offer a different perspective."</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You qualify whether they're actually committed (exclusive agreement) or just casually working with someone. Many prospects say this as a brush-off. If they're not exclusive, you create an opening for a "second opinion."
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I already have an agent in mind"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-6')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-6">"That's awesome that you've done some research! Have you already had your first meeting with them? [If no] Would you be open to hearing what [Agent Name] offers before you make your final decision? It never hurts to compare. [If yes] No problem! If things don't work out, we'd love to be your backup option."</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You're finding out if they've committed or are still in shopping mode. If they haven't met yet, there's still opportunity. Even if they have, you're planting a seed as the backup.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"My friend/family member is an agent"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-7')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-7">"That's great that you have someone you trust! Are they actively working with you right now? [If yes] Perfect, I hope it goes well! [If no/unsure] I totally get wanting to work with someone you know. Sometimes though, people find it easier to keep business and personal separate. Would you be open to just hearing what [Agent Name] offers, just in case?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You acknowledge the relationship but hint at the awkwardness of mixing business and friendship. Many people use this as an excuse but haven't actually committed to their friend/family member.
+                    </div>
+                </div>
+            </div>
+
+            <!-- INTEREST OBJECTIONS -->
+            <div id="interest-objections" class="objection-category">
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"I'm not interested"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-8')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-8">"I understand! Can I ask - is it just bad timing right now, or are you not planning to [buy/sell] at all? [If timing] When would be a better time to follow up? [If not planning] No problem, thanks for your time! Just one quick question - if your situation changed, would you want me to reach out, or should I remove you from our list?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You're qualifying the objection. Is it timing or genuine disinterest? Either way, you're being respectful while leaving the door open for future contact.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
+                        <span>"Can you just email me the information?"</span>
+                    </div>
+                    <div class="objection-response">
+                        <button class="copy-response-btn" onclick="copyResponse('response-9')">📋 Copy</button>
+                        <div class="response-label">✅ YOUR RESPONSE:</div>
+                        <div class="response-text" id="response-9">"Absolutely, I'd be happy to send that over! [Agent Name] also has some exclusive listings and market insights that aren't online yet. Would a 10-minute call work to go over those with you? It's much faster than email back-and-forth. How's tomorrow at 3 PM?"</div>
+                    </div>
+                    <div class="why-it-works">
+                        <strong>💡 Why This Works:</strong>
+                        You agree to email (removing resistance) but introduce FOMO with "exclusive listings not online." You reframe the call as more efficient than email. Then you go for the close with a specific time.
+                    </div>
+                </div>
+
+                <div class="objection-card">
+                    <div class="objection-title">
+                        <span>❌</span>
